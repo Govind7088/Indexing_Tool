@@ -98,3 +98,49 @@ class RateLimitTests(CleanAPITestCase):
             statuses.append(response.status_code)
         self.assertIn(status.HTTP_429_TOO_MANY_REQUESTS, statuses)
         self.assertLess(URLSubmission.objects.count(), 30)
+
+
+
+class DuplicateAndStatusAttackTests(CleanAPITestCase):
+
+    def post(self, payload):
+        return self.client.post(reverse('url-list'), payload, format='json')
+
+    def test_client_cannot_set_statuses_on_create(self):
+        response = self.post({'url': 'https://example.com',
+                              'inspection_status': 'indexed',
+                              'indexing_request_status': 'submitted'})
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        item = URLSubmission.objects.get()
+        self.assertEqual(item.inspection_status, 'not_inspected')
+        self.assertEqual(item.indexing_request_status, 'not_requested')
+
+    def test_case_variants_cannot_bypass_duplicate_check(self):
+        variants = ['https://example.com/a', 'HTTPS://example.com/a',
+                    'https://EXAMPLE.com/a', 'https://example.com/a#1',
+                    'https://example.com/a#2', '  https://example.com/a  ']
+        for url in variants:
+            self.post({'url': url})
+        self.assertEqual(URLSubmission.objects.count(), 1)
+
+    def test_credentials_in_url_are_rejected(self):
+        for bad in ('https://admin:password@example.com/',
+                    'https://token@example.com/',
+                    'https://@example.com/'):
+            with self.subTest(url=bad):
+                self.assertEqual(self.post({'url': bad}).status_code,
+                                 status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(URLSubmission.objects.count(), 0)
+
+    def test_url_hash_is_not_exposed(self):
+        response = self.post({'url': 'https://example.com'})
+        self.assertNotIn('url_hash', response.data)
+        listing = self.client.get(reverse('all-urls'))
+        self.assertNotIn('url_hash', listing.data[0])
+
+    def test_duplicate_flood_is_also_throttled(self):
+        statuses = []
+        for _ in range(30):
+            statuses.append(self.post({'url': 'https://example.com'}).status_code)
+        self.assertIn(status.HTTP_429_TOO_MANY_REQUESTS, statuses)
+        self.assertEqual(URLSubmission.objects.count(), 1)

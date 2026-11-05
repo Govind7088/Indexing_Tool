@@ -1,8 +1,6 @@
 import pymysql
 
-# Django ka MySQL backend mysqlclient 2.2.1+ maangta hai.
-# Purane PyMySQL ka version number chhota dikhta hai, isliye version fake karte hain.
-if pymysql.version_info < (2, 2, 1):
-    pymysql.version_info = (2, 2, 1, 'final', 0)
-
+# PyMySQL ko Django ke MySQL backend ke liye "MySQLdb" ki tarah register karta hai.
+# Django 5.2 ko mysqlclient 1.4.3+ chahiye aur PyMySQL ka version_info already
+# usse bada report karta hai, isliye version badalne ka koi workaround nahi chahiye.
 pymysql.install_as_MySQLdb()
