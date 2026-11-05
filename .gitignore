@@ -1,0 +1,22 @@
+# Secrets - kabhi Git mein nahi jane chahiye
+.env
+*.env
+!.env.example
+credentials/
+*service-account*.json
+*credentials*.json
+
+# Python
+venv/
+__pycache__/
+*.pyc
+db.sqlite3
+
+# Node / React
+node_modules/
+frontend/dist/
+
+# Editor / OS
+.vscode/
+.DS_Store
+Thumbs.db
