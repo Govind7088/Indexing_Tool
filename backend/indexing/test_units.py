@@ -82,7 +82,8 @@ class URLSubmissionModelTests(TestCase):
     def test_status_choices_are_frozen(self):
         self.assertEqual(
             URLSubmission.InspectionStatus.values,
-            ['not_inspected', 'pending', 'indexed', 'not_indexed', 'error'])
+            ['not_inspected', 'pending', 'indexed', 'not_indexed',
+            'quota_exceeded', 'auth_error', 'permission_denied', 'error'])
         self.assertEqual(
             URLSubmission.IndexingRequestStatus.values,
             ['not_requested', 'pending', 'submitted', 'failed'])
@@ -191,4 +192,4 @@ class URLSubmissionSerializerTests(TestCase):
         self.assertEqual(
             set(URLSubmissionSerializer(item).data.keys()),
             {'id', 'url', 'inspection_status', 'indexing_request_status',
-             'created_at', 'updated_at'})
+             'coverage_state', 'last_inspected_at', 'created_at', 'updated_at'})

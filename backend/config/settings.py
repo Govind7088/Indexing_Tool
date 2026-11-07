@@ -6,6 +6,7 @@ Sab kuch backend/.env se aata hai (.env Git mein nahi jaati).
 """
 
 import os
+import sys
 from pathlib import Path
 
 from django.core.exceptions import ImproperlyConfigured
@@ -136,5 +137,26 @@ REST_FRAMEWORK = {
     # Ek IP se 1 minute mein max 20 URL submit
     'DEFAULT_THROTTLE_RATES': {
         'submit': '20/min',
+        'recheck': '10/min',
     },
 }
+
+# --- Google (Search Console URL Inspection API) -----------------------
+# GOOGLE_ENABLED=False ho to tool sirf URL save karta hai, Google ko kuch nahi bhejta.
+GOOGLE_ENABLED = env_bool('GOOGLE_ENABLED', False)
+# Login: default mein ADC (gcloud auth application-default login). Service account sirf optional.
+GOOGLE_SERVICE_ACCOUNT_FILE = os.getenv('GOOGLE_SERVICE_ACCOUNT_FILE', '').strip()
+# Optional: quota project ID (ADC mein pehle se set ho to zaroorat nahi).
+GOOGLE_CLOUD_PROJECT = os.getenv('GOOGLE_CLOUD_PROJECT', '').strip()
+# Indexing API sirf JobPosting / livestream pages ke liye hai. Normal URL ke liye band rakho.
+GOOGLE_INDEXING_API_ENABLED = env_bool('GOOGLE_INDEXING_API_ENABLED', False)
+
+# --- Tests: asli Google kabhi nahi ---------------------------------------
+# "python manage.py test" chale to .env ke Google settings ignore hote hain, taaki tests
+# kabhi aapke asli Google account se baat na karein. Google wale tests mock use karte hain.
+TESTING = len(sys.argv) > 1 and sys.argv[1] == 'test'
+if TESTING:
+    GOOGLE_ENABLED = False
+    GOOGLE_INDEXING_API_ENABLED = False
+    GOOGLE_SERVICE_ACCOUNT_FILE = ''
+    GOOGLE_CLOUD_PROJECT = ''

@@ -11,6 +11,9 @@ class URLSubmission(models.Model):
         PENDING = 'pending', 'Pending'
         INDEXED = 'indexed', 'Indexed'
         NOT_INDEXED = 'not_indexed', 'Not indexed'
+        QUOTA_EXCEEDED = 'quota_exceeded', 'Quota exceeded'
+        AUTH_ERROR = 'auth_error', 'Google login problem'
+        PERMISSION_DENIED = 'permission_denied', 'No access to this URL'
         ERROR = 'error', 'Error'
 
     class IndexingRequestStatus(models.TextChoices):
@@ -35,11 +38,16 @@ class URLSubmission(models.Model):
         default=IndexingRequestStatus.NOT_REQUESTED,
     )
 
+    # Google ne jo coverage text bheja (jaise "URL is unknown to Google"), as-is.
+    coverage_state = models.CharField(max_length=255, blank=True, default='')
+    # Kab Google ne sach mein jawab diya (indexed/not_indexed). Error par set nahi hota.
+    last_inspected_at = models.DateTimeField(null=True, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
     class Meta:
-        ordering = ['-created_at', '-id']  # sabse naya sabse pehle
+        ordering = ['-updated_at', '-id']  # sabse naya sabse pehle
 
     def __str__(self):
         return self.url

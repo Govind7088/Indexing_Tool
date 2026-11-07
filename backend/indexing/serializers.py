@@ -13,12 +13,12 @@ class URLSubmissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = URLSubmission
         fields = [
-            'id', 'url', 'inspection_status', 'indexing_request_status',
+            'id', 'url', 'inspection_status', 'indexing_request_status', 'coverage_state', 'last_inspected_at',
             'created_at', 'updated_at',
         ]
         # Client in fields ko kabhi set nahi kar sakta (mass-assignment se bachav)
         read_only_fields = [
-            'id', 'inspection_status', 'indexing_request_status',
+            'id', 'inspection_status', 'indexing_request_status', 'coverage_state', 'last_inspected_at',
             'created_at', 'updated_at',
         ]
 
@@ -33,4 +33,5 @@ class URLSubmissionSerializer(serializers.ModelSerializer):
         if '@' in parts.netloc:
             raise serializers.ValidationError(
                 'URL mein username/password allowed nahi hai.')
-        return normalize_url(value)
+        normalized = normalize_url(value)
+        return normalized

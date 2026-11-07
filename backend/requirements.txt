@@ -1,0 +1,7 @@
+# Django 5.2 hi rakho: Django 6.1 ko MySQL 8.4+ chahiye, aur hamara MySQL 8.0 hai.
+Django>=5.2,<5.3
+djangorestframework>=3.16
+python-dotenv>=1.0
+PyMySQL>=1.1
+google-auth>=2.30
+requests>=2.31
